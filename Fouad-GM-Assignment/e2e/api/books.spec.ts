@@ -160,7 +160,7 @@ test.describe('API — Delete Book', () => {
     // Assert non-existent book deletion fails
     expect(deleteResponse.status).toBe(400);
     const body = deleteResponse.body as { code: string; message: string };
-    expect(body.message).toBe(ERROR_MESSAGES.isbnNotFound);
+    expect(body.message).toBe(ERROR_MESSAGES.isbnNotFoundInUserCollection);
 
     logger.info('Non-existent book deletion correctly rejected');
   });

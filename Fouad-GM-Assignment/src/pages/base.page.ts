@@ -45,14 +45,31 @@ export abstract class BasePage {
 
       // Remove ad frames and fixed banners
       const ads = document.querySelectorAll(
-        '#fixedban, .ad, iframe[id*="google_ads"], #adplus-anchor, div[id*="ad-"]'
+        '#fixedban, .ad, iframe[id*="google_ads"], #adplus-anchor, div[id*="ad-"], div[class*="ad-"], ins.adsbygoogle'
       );
       ads.forEach((ad: Element) => ad.remove());
 
       // Remove right-side ad column if present
       const rightSide = document.querySelector('.right-panel');
       if (rightSide) rightSide.remove();
+      
+      // Remove fixed overlay banners
+      const banners = document.querySelectorAll('div[id*="google_ads_iframe"]');
+      banners.forEach((b: Element) => b.remove());
     });
+  }
+
+  /**
+   * Helper to select an option from a React-Select dropdown (common in DemoQA).
+   */
+  async selectReactOption(container: Locator, optionText: string): Promise<void> {
+    this.logger.step(`Selecting React option: ${optionText}`);
+    await container.click();
+    // Wait for the menu to appear
+    const option = this.page.locator('div[id*="react-select-"][id*="-option"]', { hasText: optionText });
+    await option.scrollIntoViewIfNeeded();
+    await option.click();
+    this.logger.info(`Option selected: ${optionText}`);
   }
 
   /**

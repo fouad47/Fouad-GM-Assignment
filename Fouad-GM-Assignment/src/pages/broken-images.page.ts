@@ -78,11 +78,13 @@ export class BrokenImagesPage extends BasePage {
     for (let i = 0; i < count; i++) {
       const src = await this.getImageSrc(i);
       const status = await this.getImageStatus(i);
+      const isRendered = await this.isImageRendered(i);
+      
       results.push({
         index: i,
         src,
         status,
-        broken: status !== 200,
+        broken: status !== 200 || !isRendered,
       });
     }
 

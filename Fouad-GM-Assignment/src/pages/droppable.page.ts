@@ -27,11 +27,31 @@ export class DroppablePage extends BasePage {
 
   /**
    * Perform drag and drop from the draggable element to the drop target.
+   * Uses manual mouse movements for better reliability on flaky sites.
    */
   async dragToTarget(): Promise<void> {
-    this.logger.step('Performing drag and drop');
-    await this.draggable.dragTo(this.droppable);
-    this.logger.info('Drag and drop action completed');
+    this.logger.step('Performing manual drag and drop');
+    
+    // Get bounding boxes
+    const dragBox = await this.draggable.boundingBox();
+    const dropBox = await this.droppable.boundingBox();
+
+    if (!dragBox || !dropBox) {
+      this.logger.error('Could not find bounding boxes for drag/drop');
+      // Fallback to standard dragTo if boxes are missing
+      await this.draggable.dragTo(this.droppable);
+      return;
+    }
+
+    // Manual drag sequence with better timing
+    await this.page.mouse.move(dragBox.x + dragBox.width / 2, dragBox.y + dragBox.height / 2);
+    await this.page.mouse.down();
+    await this.page.waitForTimeout(200); // Small wait to ensure drag starts
+    await this.page.mouse.move(dropBox.x + dropBox.width / 2, dropBox.y + dropBox.height / 2, { steps: 20 });
+    await this.page.waitForTimeout(200); // Ensure target registers move
+    await this.page.mouse.up();
+    
+    this.logger.info('Manual drag and drop sequence completed');
   }
 
   /**
@@ -50,6 +70,7 @@ export class DroppablePage extends BasePage {
   async assertDropSuccess(): Promise<void> {
     this.logger.step('Asserting drop success');
     const text = await this.getDropTargetText();
+    // DemoQA uses capitalised "Dropped!"
     expect(text).toBe('Dropped!');
     this.logger.info('Drop success assertion passed');
   }

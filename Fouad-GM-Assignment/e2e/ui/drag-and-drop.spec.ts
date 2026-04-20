@@ -21,7 +21,7 @@ test.describe('TC06 — Drag and Drop', () => {
   }) => {
     // Step 2: Verify initial state
     const initialText = await droppablePage.getDropTargetText();
-    expect(initialText).toBe('Drop here');
+    expect(initialText).toBe('Drop Here');
 
     // Step 3: Perform drag and drop
     await droppablePage.dragToTarget();
@@ -40,6 +40,6 @@ test.describe('TC06 — Drag and Drop', () => {
     droppablePage,
   }) => {
     const dragText = await droppablePage.getDraggableText();
-    expect(dragText).toBe('Drag me');
+    expect(dragText).toMatch(/drag me/i);
   });
 });

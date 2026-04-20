@@ -105,19 +105,12 @@ export class PracticeFormPage extends BasePage {
 
   /** Select state from dropdown */
   private async selectState(state: string): Promise<void> {
-    this.logger.step(`Selecting state: ${state}`);
-    await this.page.locator('#state').click();
-    await this.page.locator(`#react-select-3-option-0`).click(); // Select first available state
-    // More precise: find the option by text
-    await this.page.locator('#state').click();
-    await this.page.locator(`div[id*="react-select-3-option"]`, { hasText: state }).click();
+    await this.selectReactOption(this.page.locator('#state'), state);
   }
 
   /** Select city from dropdown */
   private async selectCity(city: string): Promise<void> {
-    this.logger.step(`Selecting city: ${city}`);
-    await this.page.locator('#city').click();
-    await this.page.locator(`div[id*="react-select-4-option"]`, { hasText: city }).click();
+    await this.selectReactOption(this.page.locator('#city'), city);
   }
 
   /**
@@ -166,7 +159,12 @@ export class PracticeFormPage extends BasePage {
     // Submit the form
     this.logger.step('Submitting form');
     await this.scrollIntoView(this.submitButton);
-    await this.submitButton.click();
+    // Give a small delay for React state (City/State) to settle
+    await this.page.waitForTimeout(500);
+    // Use force: true as ads sometimes invisibly overlay the button
+    await this.submitButton.click({ force: true });
+    // Wait for the submission modal to appear
+    await this.page.waitForSelector('.modal-content', { state: 'visible', timeout: 5000 });
 
     this.logger.info('Form submitted successfully');
   }

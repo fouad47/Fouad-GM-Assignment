@@ -78,6 +78,8 @@ export class WebTablesPage extends BasePage {
 
     this.logger.step('Submitting form');
     await this.submitButton.click();
+    // Wait for the modal to close and table to refresh
+    await this.page.waitForLoadState('networkidle');
   }
 
   /**
@@ -94,7 +96,13 @@ export class WebTablesPage extends BasePage {
    */
   async search(text: string): Promise<void> {
     this.logger.step(`Searching for: ${text}`);
+    // Clear the search box explicitly first
+    await this.searchBox.click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
     await this.searchBox.fill(text);
+    // Wait for the search to filter (there's a small lag in DemoQA's filtering)
+    await this.page.waitForTimeout(500);
   }
 
   /**
@@ -110,8 +118,8 @@ export class WebTablesPage extends BasePage {
       const cells = row.locator('.rt-td');
       const firstCellText = await cells.nth(0).textContent();
 
-      // Skip empty rows (they have whitespace-only cells)
-      if (firstCellText && firstCellText.trim() !== '') {
+      // Skip empty rows (they have whitespace-only cells or just no text)
+      if (firstCellText && firstCellText.trim() !== '' && firstCellText.trim() !== '\u00a0') {
         const rowData: string[] = [];
         const cellCount = await cells.count();
         for (let j = 0; j < cellCount - 1; j++) {
@@ -132,7 +140,10 @@ export class WebTablesPage extends BasePage {
    */
   async assertRecordExists(firstName: string): Promise<void> {
     this.logger.step(`Asserting record exists: ${firstName}`);
+    // Brief wait for table refresh
+    await this.page.waitForTimeout(500);
     const cell = this.page.locator(`.rt-td:has-text("${firstName}")`).first();
+    await cell.waitFor({ state: 'visible', timeout: 5000 });
     await expect(cell).toBeVisible();
     this.logger.info(`Record found: ${firstName}`);
   }
@@ -205,6 +216,8 @@ export class WebTablesPage extends BasePage {
     }
 
     await this.submitButton.click();
+    // Wait for the modal to close and table to refresh
+    await this.page.waitForLoadState('networkidle');
     this.logger.info(`Record updated for: ${searchText}`);
   }
 
