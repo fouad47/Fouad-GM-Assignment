@@ -1,0 +1,26 @@
+{
+  "name": "fouad-gm-assignment",
+  "version": "1.0.0",
+  "description": "Production-ready Playwright + TypeScript automation framework for DemoQA — UI & API tests with POM design pattern",
+  "author": "Fouad",
+  "license": "MIT",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --project=ui-chromium",
+    "test:api": "npx playwright test --project=api",
+    "test:headed": "npx playwright test --project=ui-chromium --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:ui:firefox": "npx playwright test --project=ui-firefox",
+    "report": "npx playwright show-report reports/html",
+    "lint": "tsc --noEmit",
+    "clean": "rimraf reports test-results"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^25.6.0",
+    "ajv": "^8.17.0",
+    "dotenv": "^16.4.0",
+    "rimraf": "^6.0.0",
+    "typescript": "^5.7.0"
+  }
+}
